@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresources — Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1A56A0; --blue-light: #EAF1FB; --blue-mid: #6B96CC;
+    --teal: #0F6E56; --teal-light: #E4F5EF; --teal-mid: #5DA890;
+    --stone: #4A4A6A; --stone-light: #F4F5F7; --stone-mid: #8888A0;
+    --ink: #1A1A2E; --mist: #F7F8FA; --border: #E2E4EC;
+    --text-primary: #1A1A2E; --text-secondary: #5A5A7A; --text-muted: #9090A8;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--mist); color: var(--text-primary); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+  .page { max-width: 1080px; margin: 0 auto; padding: 48px 32px 80px; }
+  .header { margin-bottom: 40px; }
+  .header-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-mid); margin-bottom: 8px; }
+  .header-title { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--ink); line-height: 1.1; margin-bottom: 10px; }
+  .header-title em { font-style: italic; color: var(--blue); }
+  .header-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-mid); flex-shrink: 0; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin: 40px 0 14px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+  .kpi-grid { display: grid; gap: 10px; }
+  .kpi { background: #fff; border: 0.5px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 400; }
+  .kpi-value { font-size: 26px; font-weight: 500; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .kpi-sub { font-size: 11px; color: var(--text-muted); }
+  .kpi.accent { background: var(--teal-light); border-color: #b8ddd4; }
+  .kpi.accent .kpi-value { color: var(--teal); }
+  .kpi.accent .kpi-label, .kpi.accent .kpi-sub { color: #5DA890; }
+  .kpi.blue { background: var(--blue-light); border-color: #b8d0ee; }
+  .kpi.blue .kpi-value { color: var(--blue); }
+  .kpi.blue .kpi-label, .kpi.blue .kpi-sub { color: var(--blue-mid); }
+  .chart-card { background: #fff; border: 0.5px solid var(--border); border-radius: 12px; padding: 22px 24px; }
+  .chart-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .chart-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .insight-card { background: var(--stone-light); border-radius: 10px; padding: 20px; border: 0.5px solid var(--border); }
+  .insight-val { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--blue); margin-bottom: 6px; line-height: 1; }
+  .insight-label { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .peak-banner { background: var(--teal-light); border: 0.5px solid #b8ddd4; border-radius: 10px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .peak-banner-text { font-size: 12px; color: var(--teal); font-weight: 500; }
+  .peak-banner-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+  .peak-stat { text-align: center; }
+  .peak-stat-val { font-size: 20px; font-weight: 500; color: var(--teal); line-height: 1; }
+  .peak-stat-label { font-size: 10px; color: var(--teal-mid); margin-top: 2px; }
+  .footer { margin-top: 56px; padding-top: 20px; border-top: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .footer-name { font-weight: 500; color: var(--ink); font-size: 13px; }
+  .footer-links { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+  .footer-links a { color: var(--blue); text-decoration: none; }
+  canvas { display: block; }
+  @media (max-width: 700px) {
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .header-title { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <p class="header-eyebrow">Analytics dashboard</p>
+    <h1 class="header-title">Fresources <em>by the numbers</em></h1>
+    <div class="header-meta">
+      <span><span class="dot"></span>Mar 2022 to Apr 2026</span>
+      <span><span class="dot"></span>fresources.tech</span>
+      <span><span class="dot"></span>DTU, NSUT, IGDTUW, IIIT, IP University</span>
+    </div>
+  </div>
+
+  <p class="section-label">Overview</p>
+  <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 10px;">
+    <div class="kpi blue"><p class="kpi-label">Total sessions</p><p class="kpi-value">4M+</p><p class="kpi-sub">Mar 2022 to Apr 2026</p></div>
+    <div class="kpi blue"><p class="kpi-label">Page views</p><p class="kpi-value">16M+</p><p class="kpi-sub">Mar 2022 to Apr 2026</p></div>
+    <div class="kpi"><p class="kpi-label">Active users</p><p class="kpi-value">283K</p><p class="kpi-sub">Unique</p></div>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="kpi"><p class="kpi-label">Avg. session</p><p class="kpi-value">31m 44s</p><p class="kpi-sub">Per active user</p></div>
+    <div class="kpi"><p class="kpi-label">Engagement rate</p><p class="kpi-value">68%</p><p class="kpi-sub">32% bounce rate</p></div>
+    <div class="kpi accent"><p class="kpi-label">Peak MAU</p><p class="kpi-value">32,160</p><p class="kpi-sub">Sep 2025, all-time high</p></div>
+  </div>
+
+  <p class="section-label">MAU growth — exam season spikes</p>
+  <div class="peak-banner">
+    <span class="peak-banner-text">Sep 2025 — all-time peak</span>
+    <div class="peak-banner-stats">
+      <div class="peak-stat"><p class="peak-stat-val">32,160</p><p class="peak-stat-label">MAU (Sep 2025)</p></div>
+      <div class="peak-stat"><p class="peak-stat-val">4,268</p><p class="peak-stat-label">DAU (peak day)</p></div>
+      <div class="peak-stat"><p class="peak-stat-val">11,319</p><p class="peak-stat-label">WAU (peak week)</p></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <p class="chart-title">Monthly active users</p>
+    <p class="chart-sub">Mar 2022 low: 1,407 &nbsp;·&nbsp; Sep 2025 high: 32,160 &nbsp;·&nbsp; 22.9x growth, zero paid acquisition</p>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#6B96CC"></span>Regular months</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0F6E56"></span>Exam season (midsem + endsem, both semesters)</span>
+    </div>
+    <div style="position:relative;width:100%;height:230px;">
+      <canvas id="growthChart" role="img" aria-label="Monthly active users Mar 2022 to Apr 2026 with all 4 exam seasons per year highlighted in green, growing 22.9x from 1407 to 32160">Monthly active users growing 22.9x with 4 exam season peaks per year.</canvas>
+    </div>
+  </div>
+
+  <p class="section-label">Acquisition</p>
+  <div class="two-col">
+    <div class="chart-card">
+      <p class="chart-title">Sessions by channel</p>
+      <p class="chart-sub">Direct traffic leads at 60%. Organic search 35%. Zero paid acquisition ever.</p>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#6B96CC"></span>Direct 60%</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#5DA890"></span>Organic search 35%</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#A8A8C0"></span>Referral 5%</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#D0D0DC"></span>Other 0.4%</span>
+      </div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="acqChart" role="img" aria-label="Sessions: Direct 2.4M 60%, Organic Search 1.4M 35%, Referral 196K 5%">Direct 60%, Organic Search 35%, Referral 5%</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <p class="chart-title">New vs returning users</p>
+      <p class="chart-sub">New users engaged more than returning ones. Pattern consistent across 5 years.</p>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#6B96CC"></span>New users — 83% engagement</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#5DA890"></span>Returning — 72% engagement</span>
+      </div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="retChart" role="img" aria-label="New users 289K at 83% engagement, Returning 150K at 72% engagement">New 289K (83% engagement), Returning 150K (72%)</canvas>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label">Engagement</p>
+  <div class="two-col">
+    <div class="chart-card">
+      <p class="chart-title">Event counts</p>
+      <p class="chart-sub">8.3M scroll events vs 16M page views — users were reading deeply, not bouncing.</p>
+      <div style="position:relative;width:100%;height:240px;">
+        <canvas id="eventsChart" role="img" aria-label="Events: page_view 16M, scroll 8.3M, user_engagement 6.1M, session_start 4M, click 1.5M, first_visit 290K, file_download 96K">page_view 16M, scroll 8.3M, engagement 6.1M</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <p class="chart-title">Active users by device</p>
+      <p class="chart-sub">Near-even mobile/desktop split. Students use it on both phone and laptop.</p>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#6B96CC"></span>Mobile 51% — 149K</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#5DA890"></span>Desktop 48% — 140K</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#D0D0DC"></span>Tablet 2% — 6K</span>
+      </div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="deviceChart" role="img" aria-label="Device split: Mobile 149K, Desktop 140K, Tablet 6K">Mobile 51%, Desktop 48%, Tablet 2%</canvas>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label">Growth multipliers</p>
+  <div class="three-col">
+    <div class="insight-card">
+      <p class="insight-val">22.9x</p>
+      <p class="insight-label">MAU growth from the lowest point (Mar 2022: 1,407) to the all-time high (Sep 2025: 32,160). Entirely word of mouth.</p>
+    </div>
+    <div class="insight-card">
+      <p class="insight-val">83%</p>
+      <p class="insight-label">New user engagement rate. Higher than returning users (72%), meaning first-time visitors found what they needed immediately.</p>
+    </div>
+    <div class="insight-card">
+      <p class="insight-val">15.2%</p>
+      <p class="insight-label">Week 1 retention rate. Students return when they need to study, not daily. The pattern is utility-driven, not habit-driven.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-name">Anusha Mahajan</span>
+    <div class="footer-links">
+      <a href="mailto:anushamahajan2304@gmail.com">anushamahajan2304@gmail.com</a>
+      <a href="https://linkedin.com/in/anushamahajan">linkedin.com/in/anushamahajan</a>
+      <a href="https://cv-anushamahajan.vercel.app">cv-anushamahajan.vercel.app</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BLUE = '#6B96CC';
+const TEAL = '#5DA890';
+const TEAL_DARK = '#0F6E56';
+const STONE = '#A8A8C0';
+const LIGHT = '#D0D0DC';
+const INK = '#1A1A2E';
+const GRID = 'rgba(0,0,0,0.05)';
+const TICK = '#9090A8';
+
+const fmt = v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : v;
+
+const base = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { backgroundColor: '#fff', titleColor: INK, bodyColor: '#5A5A7A', borderColor: '#E2E4EC', borderWidth: 1, padding: 10, cornerRadius: 8 } }
+};
+
+const axisStyle = {
+  x: { grid: { display: false }, border: { display: false }, ticks: { color: TICK, font: { size: 10, family: 'DM Sans' }, maxRotation: 0 } },
+  y: { grid: { color: GRID }, border: { display: false }, ticks: { color: TICK, font: { size: 10, family: 'DM Sans' }, callback: fmt } }
+};
+
+const months = ["2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04"];
+const mau = [1407,2787,3309,7255,10392,8987,8412,9354,17155,24217,21631,20878,24055,20625,21753,21137,16965,19028,26961,26294,21854,21276,15130,14935,18499,21608,18111,12325,7931,16123,26261,24973,22385,22518,16106,18213,19211,16388,17663,14243,10454,20336,32160,29416,24175,25252,18361,19558,21512,16801];
+const peakIdx = new Set([0,2,3,8,9,12,15,18,19,21,24,26,27,30,33,36,38,39,42,43,45,48]);
+
+new Chart(document.getElementById('growthChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [{ data: mau, backgroundColor: mau.map((_,i) => peakIdx.has(i) ? TEAL_DARK : BLUE), borderRadius: 3, borderWidth: 0 }]
+  },
+  options: { ...base, scales: { x: { ...axisStyle.x, ticks: { ...axisStyle.x.ticks, maxTicksLimit: 14 } }, y: axisStyle.y } }
+});
+
+new Chart(document.getElementById('acqChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Direct','Organic search','Referral','Other'],
+    datasets: [{ data: [2399004,1401308,195794,51000], backgroundColor: [BLUE,TEAL,STONE,LIGHT], borderWidth: 0 }]
+  },
+  options: { ...base, cutout: '62%' }
+});
+
+new Chart(document.getElementById('retChart'), {
+  type: 'bar',
+  data: {
+    labels: ['New users', 'Returning users'],
+    datasets: [{ data: [289197,149689], backgroundColor: [BLUE,TEAL], borderRadius: 5, borderWidth: 0 }]
+  },
+  options: { ...base, scales: axisStyle }
+});
+
+new Chart(document.getElementById('eventsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['page_view','scroll','engagement','session_start','click','first_visit','download'],
+    datasets: [{ data: [16036631,8267283,6100536,3996787,1495510,289690,95648], backgroundColor: [BLUE,BLUE,TEAL,TEAL,STONE,LIGHT,LIGHT], borderRadius: 3, borderWidth: 0 }]
+  },
+  options: { ...base, scales: { x: { ...axisStyle.x, ticks: { ...axisStyle.x.ticks, maxRotation: 20 } }, y: axisStyle.y } }
+});
+
+new Chart(document.getElementById('deviceChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Mobile','Desktop','Tablet'],
+    datasets: [{ data: [149474,139591,5965], backgroundColor: [BLUE,TEAL,LIGHT], borderWidth: 0 }]
+  },
+  options: { ...base, cutout: '62%' }
+});
+</script>
+</body>
+</html>
