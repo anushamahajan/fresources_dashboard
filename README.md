@@ -2,7 +2,7 @@
 
 > The one-stop study platform every Indian engineering student needed but nobody had built.
 
-**[Analytics Dashboard](https://cv-anushamahajan.vercel.app)** · **[Case Study](https://cv-anushamahajan.vercel.app)**
+**[Analytics Dashboard](https://anushamahajan.github.io/fresources_dashboard/)** · **[Case Study](https://drive.google.com/file/d/17g6s9BF-D3fnHpCXQIF-irbZ4WDuVprt/view?usp=sharing)**
 
 ---
 
@@ -78,8 +78,8 @@ We kept it a community platform. Knowing when not to monetise is a product decis
 
 ## Portfolio
 
-- [Analytics Dashboard](https://cv-anushamahajan.vercel.app) — full GA data, MAU growth chart, acquisition breakdown, engagement metrics
-- [Case Study](https://cv-anushamahajan.vercel.app) — product narrative, feature decisions, growth story
+- [Analytics Dashboard](https://anushamahajan.github.io/fresources_dashboard/) — full GA data, MAU growth chart, acquisition breakdown, engagement metrics
+- [Case Study](https://drive.google.com/file/d/17g6s9BF-D3fnHpCXQIF-irbZ4WDuVprt/view?usp=sharing) — product narrative, feature decisions, growth story
 
 ---
 
